@@ -335,12 +335,12 @@
       
       // Create event title and details
       const title = meetingInfo || "Meeting";
-      const details = `${meetingInfo}\n\n` +
-                     `${swissLabel} ${swissTime}\n` +
-                     `${easternLabel} ${easternTime}\n` +
-                     `${centralLabel} ${centralTime}\n` +
-                     `${pacificLabel} ${pacificTime}\n` +
-                     `${ukraineLabel} ${ukraineTime}`;
+      let details = `${meetingInfo}\n\n` +
+                   `${swissLabel} ${swissTime}\n` +
+                   `${easternLabel} ${easternTime}\n` +
+                   `${centralLabel} ${centralTime}\n` +
+                   `${pacificLabel} ${pacificTime}\n` +
+                   `${ukraineLabel} ${ukraineTime} - We stand with Ukraine 24x7`;
       
       // Create calendar file content (iCal format)
       const startHour = sourceHour.toString().padStart(2, '0');
@@ -351,15 +351,49 @@
       const endHour = Math.floor(endHourValue).toString().padStart(2, '0');
       const endMinuteStr = Math.floor(endMinutes).toString().padStart(2, '0');
       
+      // Map source time zone to IANA timezone ID for .ics file
+      let tzid = "UTC";
+      switch(sourceZone) {
+        case "swiss":
+          tzid = "Europe/Zurich";
+          break;
+        case "eastern":
+          tzid = "America/New_York";
+          break;
+        case "central":
+          tzid = "America/Chicago";
+          break;
+        case "pacific":
+          tzid = "America/Los_Angeles";
+          break;
+        case "ukraine":
+          tzid = "Europe/Kiev";
+          break;
+      }
+      
+      // Create proper date-time strings with timezone
+      const dateStr = meetingDate.replace(/-/g, '');
+      const dtStart = `${dateStr}T${startHour}0000`;
+      const dtEnd = `${dateStr}T${endHour}${endMinuteStr}00`;
+      
       const icalContent = 
         `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//SMP Time Zone Converter//EN
+METHOD:PUBLISH
+BEGIN:VTIMEZONE
+TZID:${tzid}
+END:VTIMEZONE
 BEGIN:VEVENT
 SUMMARY:${title}
-DTSTART:${meetingDate}T${startHour}0000Z
-DTEND:${meetingDate}T${endHour}${endMinuteStr}00Z
+DTSTART;TZID=${tzid}:${dtStart}
+DTEND;TZID=${tzid}:${dtEnd}
 DESCRIPTION:${details.replace(/\n/g, '\\n')}
+LOCATION:${tzid}
+STATUS:CONFIRMED
+SEQUENCE:0
+CLASS:PUBLIC
+TRANSP:OPAQUE
 END:VEVENT
 END:VCALENDAR`;
       
