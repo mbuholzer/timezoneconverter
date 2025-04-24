@@ -2,6 +2,8 @@
 
 A simple, elegant web-based time zone converter that helps coordinate meetings across different time zones. This tool also generates calendar files (.ics) for easy import into calendar applications.
 
+https://mbuholzer.github.io/timezoneconverter/
+
 ## Creator
 **Michael Buholzer** ([@mbuholzer](https://github.com/mbuholzer))
 
