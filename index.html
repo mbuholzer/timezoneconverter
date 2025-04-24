@@ -32,6 +32,7 @@
     .output-section {
       display: flex;
       justify-content: space-between;
+      flex-wrap: wrap;
     }
     .time-zone {
       width: 30%;
@@ -103,6 +104,8 @@
           <option value="swiss">Swiss Time (CET/CEST)</option>
           <option value="eastern">Eastern Time (ET)</option>
           <option value="central">Central Time (CT)</option>
+          <option value="pacific">Pacific Time (PT)</option>
+          <option value="ukraine">Ukraine Time (EET/EEST)</option>
         </select>
         
         <select id="sourceHour">
@@ -156,6 +159,21 @@
           <div class="timezone-label">Central Time (CT):</div>
           <div class="cities"><b>"Melanie Time"</b>, Dallas, Milwaukee, Chicago</div>
           <div id="centralTime" class="output">--:--</div>
+        </div>
+      </div>
+      
+      <div class="time-zone" style="width: 100%; margin-top: 15px;">
+        <div class="time-display" style="display: flex; justify-content: space-between; background-color: #f5f9fc; border: 1px solid #0057b7;">
+          <div style="flex: 1;">
+            <div class="timezone-label">Ukraine Time (EET/EEST):</div>
+            <div class="cities">Kyiv, Lviv, Odesa, Kryvyi Rih</div>
+            <div id="ukraineTime" class="output" style="color: #0057b7;">--:--</div>
+          </div>
+          <div style="display: flex; flex-direction: column; justify-content: center; align-items: flex-end; padding-right: 10px;">
+            <div style="color: #0057b7; font-weight: bold;">We Stand With Ukraine</div>
+            <div style="height: 10px; background-color: #0057b7; width: 100%; margin-top: 5px;"></div>
+            <div style="height: 10px; background-color: #ffd700; width: 100%;"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -232,13 +250,15 @@
       
       // Get current date to determine if DST is active
       const now = new Date();
-      const isDstSwitzerland = isDstEurope(now);
+      const isDstEurope_ = isDstEurope(now);
       const isDstUnitedStates = isDstUS(now);
       
       // Calculate offsets from UTC
-      const swissOffset = isDstSwitzerland ? 2 : 1; // UTC+1/+2
+      const swissOffset = isDstEurope_ ? 2 : 1; // UTC+1/+2
       const easternOffset = isDstUnitedStates ? -4 : -5; // UTC-5/-4
       const centralOffset = isDstUnitedStates ? -5 : -6; // UTC-6/-5
+      const pacificOffset = isDstUnitedStates ? -7 : -8; // UTC-8/-7
+      const ukraineOffset = isDstEurope_ ? 3 : 2; // UTC+2/+3
       
       // Calculate UTC time based on source time zone
       let utcHour;
@@ -249,48 +269,78 @@
         utcHour = (sourceHour - easternOffset + 24) % 24;
       } else if (sourceZone === 'central') {
         utcHour = (sourceHour - centralOffset + 24) % 24;
+      } else if (sourceZone === 'pacific') {
+        utcHour = (sourceHour - pacificOffset + 24) % 24;
+      } else if (sourceZone === 'ukraine') {
+        utcHour = (sourceHour - ukraineOffset + 24) % 24;
       }
       
       // Calculate all time zones from UTC
       const swissHour = (utcHour + swissOffset + 24) % 24;
       const easternHour = (utcHour + easternOffset + 24) % 24;
       const centralHour = (utcHour + centralOffset + 24) % 24;
+      const pacificHour = (utcHour + pacificOffset + 24) % 24;
+      const ukraineHour = (utcHour + ukraineOffset + 24) % 24;
       
       // Format hours with leading zeros
       const formatHour = (hour) => {
         return hour.toString().padStart(2, '0') + ':00';
       };
       
-      // Update all time displays
-      document.getElementById('swissTime').textContent = formatHour(swissHour);
-      document.getElementById('easternTime').textContent = formatHour(easternHour);
-      document.getElementById('centralTime').textContent = formatHour(centralHour);
+      // Update all time displays - with null checks to prevent errors
+      const swissTimeEl = document.getElementById('swissTime');
+      const easternTimeEl = document.getElementById('easternTime');
+      const centralTimeEl = document.getElementById('centralTime');
+      const pacificTimeEl = document.getElementById('pacificTime');
+      const ukraineTimeEl = document.getElementById('ukraineTime');
+      
+      if (swissTimeEl) swissTimeEl.textContent = formatHour(swissHour);
+      if (easternTimeEl) easternTimeEl.textContent = formatHour(easternHour);
+      if (centralTimeEl) centralTimeEl.textContent = formatHour(centralHour);
+      if (pacificTimeEl) pacificTimeEl.textContent = formatHour(pacificHour);
+      if (ukraineTimeEl) ukraineTimeEl.textContent = formatHour(ukraineHour);
     }
     
     // Function to create calendar event
     function createCalendarEvent() {
-      const meetingInfo = document.getElementById('meetingInfo').value;
-      const sourceZone = document.getElementById('sourceZone').value;
-      const sourceHour = parseInt(document.getElementById('sourceHour').value);
-      const meetingDate = document.getElementById('meetingDate').value || new Date().toISOString().split('T')[0];
-      const duration = parseFloat(document.getElementById('meetingDuration').value);
+      const meetingInfo = document.getElementById('meetingInfo')?.value || "";
+      const sourceZone = document.getElementById('sourceZone')?.value || "swiss";
+      const sourceHour = parseInt(document.getElementById('sourceHour')?.value || "0");
+      const meetingDate = document.getElementById('meetingDate')?.value || new Date().toISOString().split('T')[0];
+      const duration = parseFloat(document.getElementById('meetingDuration')?.value || "1");
       
-      // Format times for all zones
-      const swissTime = document.getElementById('swissTime').textContent;
-      const easternTime = document.getElementById('easternTime').textContent;
-      const centralTime = document.getElementById('centralTime').textContent;
+      // Format times for all zones - with null checks
+      const swissTime = document.getElementById('swissTime')?.textContent || "--:--";
+      const easternTime = document.getElementById('easternTime')?.textContent || "--:--";
+      const centralTime = document.getElementById('centralTime')?.textContent || "--:--";
+      const pacificTime = document.getElementById('pacificTime')?.textContent || "--:--";
+      const ukraineTime = document.getElementById('ukraineTime')?.textContent || "--:--";
       
-      // Get timezone labels
-      const swissLabel = document.querySelector('.time-zone:nth-child(1) .timezone-label').textContent;
-      const easternLabel = document.querySelector('.time-zone:nth-child(2) .timezone-label').textContent;
-      const centralLabel = document.querySelector('.time-zone:nth-child(3) .timezone-label').textContent;
+      // Get timezone labels with fallbacks
+      let swissLabel = "Swiss Time (CET/CEST):";
+      let easternLabel = "Eastern Time (ET):";
+      let centralLabel = "Central Time (CT):";
+      let pacificLabel = "Pacific Time (PT):";
+      let ukraineLabel = "Ukraine Time (EET/EEST):";
+      
+      try {
+        swissLabel = document.querySelector('.time-zone:nth-child(1) .timezone-label')?.textContent || swissLabel;
+        easternLabel = document.querySelector('.time-zone:nth-child(2) .timezone-label')?.textContent || easternLabel;
+        centralLabel = document.querySelector('.time-zone:nth-child(3) .timezone-label')?.textContent || centralLabel;
+        pacificLabel = document.querySelector('.time-zone:nth-child(4) .timezone-label')?.textContent || pacificLabel;
+        ukraineLabel = document.querySelector('.time-zone:nth-child(5) .timezone-label')?.textContent || ukraineLabel;
+      } catch (e) {
+        console.log("Error getting timezone labels:", e);
+      }
       
       // Create event title and details
       const title = meetingInfo || "Meeting";
       const details = `${meetingInfo}\n\n` +
                      `${swissLabel} ${swissTime}\n` +
                      `${easternLabel} ${easternTime}\n` +
-                     `${centralLabel} ${centralTime}`;
+                     `${centralLabel} ${centralTime}\n` +
+                     `${pacificLabel} ${pacificTime}\n` +
+                     `${ukraineLabel} ${ukraineTime}`;
       
       // Create calendar file content (iCal format)
       const startHour = sourceHour.toString().padStart(2, '0');
@@ -313,58 +363,81 @@ DESCRIPTION:${details.replace(/\n/g, '\\n')}
 END:VEVENT
 END:VCALENDAR`;
       
-      // Create a download link
-      const element = document.createElement('a');
-      element.setAttribute('href', 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icalContent));
-      element.setAttribute('download', 'meeting.ics');
-      
-      element.style.display = 'none';
-      document.body.appendChild(element);
-      
-      element.click();
-      
-      document.body.removeChild(element);
-      
-      alert('Calendar event created! Check your downloads.');
+      try {
+        // Create a download link
+        const element = document.createElement('a');
+        element.setAttribute('href', 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icalContent));
+        element.setAttribute('download', 'meeting.ics');
+        
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        
+        element.click();
+        
+        document.body.removeChild(element);
+        
+        alert('Calendar event created! Check your downloads.');
+      } catch (e) {
+        console.error("Error creating calendar event:", e);
+        alert('Error creating calendar event. Please try again.');
+      }
     }
     
     // Initialize and set up event listeners
     document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('sourceZone').addEventListener('change', updateTimes);
-      document.getElementById('sourceHour').addEventListener('change', updateTimes);
+      const sourceZoneEl = document.getElementById('sourceZone');
+      const sourceHourEl = document.getElementById('sourceHour');
+      const meetingDateEl = document.getElementById('meetingDate');
+      
+      if (sourceZoneEl) sourceZoneEl.addEventListener('change', updateTimes);
+      if (sourceHourEl) sourceHourEl.addEventListener('change', updateTimes);
       
       // Set default date to today
       const today = new Date().toISOString().split('T')[0];
-      document.getElementById('meetingDate').value = today;
+      if (meetingDateEl) meetingDateEl.value = today;
       
       // Initialize with current time based on browser's local time
       const now = new Date();
       const currentHour = now.getHours();
       
       // Set source hour to current hour
-      document.getElementById('sourceHour').value = currentHour;
+      if (sourceHourEl) sourceHourEl.value = currentHour;
       
       // Try to guess the user's time zone and set it as default
       const timezoneOffset = now.getTimezoneOffset() / 60;
       
-      if (timezoneOffset === -1 || timezoneOffset === -2) {
-        // Likely in Swiss time zone (UTC+1 or UTC+2)
-        document.getElementById('sourceZone').value = 'swiss';
-      } else if (timezoneOffset === 5 || timezoneOffset === 4) {
-        // Likely in Eastern time zone (UTC-5 or UTC-4)
-        document.getElementById('sourceZone').value = 'eastern';
-      } else if (timezoneOffset === 6 || timezoneOffset === 5) {
-        // Likely in Central time zone (UTC-6 or UTC-5)
-        document.getElementById('sourceZone').value = 'central';
+      if (sourceZoneEl) {
+        if (timezoneOffset === -1 || timezoneOffset === -2) {
+          // Likely in Swiss time zone (UTC+1 or UTC+2)
+          sourceZoneEl.value = 'swiss';
+        } else if (timezoneOffset === 5 || timezoneOffset === 4) {
+          // Likely in Eastern time zone (UTC-5 or UTC-4)
+          sourceZoneEl.value = 'eastern';
+        } else if (timezoneOffset === 6 || timezoneOffset === 5) {
+          // Likely in Central time zone (UTC-6 or UTC-5)
+          sourceZoneEl.value = 'central';
+        } else if (timezoneOffset === 8 || timezoneOffset === 7) {
+          // Likely in Pacific time zone (UTC-8 or UTC-7)
+          sourceZoneEl.value = 'pacific';
+        } else if (timezoneOffset === -2 || timezoneOffset === -3) {
+          // Likely in Ukraine time zone (UTC+2 or UTC+3)
+          sourceZoneEl.value = 'ukraine';
+        }
       }
       
       // Update times on page load
-      updateTimes();
+      setTimeout(updateTimes, 100); // Small delay to ensure DOM is ready
     });
     
     // Add event listener directly after DOM is loaded and rendered
     window.onload = function() {
-      document.getElementById('createCalendarBtn').addEventListener('click', createCalendarEvent);
+      const calendarBtn = document.getElementById('createCalendarBtn');
+      if (calendarBtn) {
+        calendarBtn.addEventListener('click', createCalendarEvent);
+      }
+      
+      // Run update times again after everything is loaded
+      updateTimes();
     };
   </script>
 </body>
