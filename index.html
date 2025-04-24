@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SMP Time Zone Converter</title>
+  <style>
+    :root {
+      --primary-red: #e31f28;
+      --dark-gray: #464b4a;
+      --light-gray: #afb1b8;
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: white;
+      color: var(--dark-gray);
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      background-color: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      border: 1px solid var(--light-gray);
+    }
+    .input-section {
+      margin-bottom: 20px;
+    }
+    .output-section {
+      display: flex;
+      justify-content: space-between;
+    }
+    .time-zone {
+      width: 30%;
+    }
+    .time-display {
+      margin-top: 10px;
+      padding: 12px;
+      background-color: #f8f8f8;
+      border-radius: 5px;
+      border: 1px solid var(--light-gray);
+    }
+    h1, h2, h3 {
+      color: var(--primary-red);
+      margin-bottom: 15px;
+    }
+    select {
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid var(--light-gray);
+      font-size: 16px;
+      color: var(--dark-gray);
+      margin-right: 10px;
+    }
+    select:focus {
+      outline: none;
+      border-color: var(--primary-red);
+    }
+    .title {
+      text-align: center;
+      margin-bottom: 20px;
+      color: var(--primary-red);
+    }
+    .output {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--primary-red);
+    }
+    .timezone-label {
+      margin-bottom: 2px;
+      font-weight: bold;
+      color: var(--dark-gray);
+    }
+    .cities {
+      font-size: 14px;
+      color: var(--light-gray);
+      font-style: italic;
+      margin-bottom: 5px;
+    }
+    .input-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    label {
+      margin-right: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="title">SMP Time Zone Converter</h1>
+  
+  <div class="container">
+    <div class="input-section">
+      <h2>Select Source Time Zone</h2>
+      <div class="input-row">
+        <label for="sourceZone">Time Zone:</label>
+        <select id="sourceZone">
+          <option value="swiss">Swiss Time (CET/CEST)</option>
+          <option value="eastern">Eastern Time (ET)</option>
+          <option value="central">Central Time (CT)</option>
+        </select>
+        
+        <select id="sourceHour">
+          <option value="0">00:00</option>
+          <option value="1">01:00</option>
+          <option value="2">02:00</option>
+          <option value="3">03:00</option>
+          <option value="4">04:00</option>
+          <option value="5">05:00</option>
+          <option value="6">06:00</option>
+          <option value="7">07:00</option>
+          <option value="8">08:00</option>
+          <option value="9">09:00</option>
+          <option value="10">10:00</option>
+          <option value="11">11:00</option>
+          <option value="12">12:00</option>
+          <option value="13">13:00</option>
+          <option value="14">14:00</option>
+          <option value="15">15:00</option>
+          <option value="16">16:00</option>
+          <option value="17">17:00</option>
+          <option value="18">18:00</option>
+          <option value="19">19:00</option>
+          <option value="20">20:00</option>
+          <option value="21">21:00</option>
+          <option value="22">22:00</option>
+          <option value="23">23:00</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="output-section">
+      <div class="time-zone">
+        <div class="time-display">
+          <div class="timezone-label">Swiss Time (CET/CEST):</div>
+          <div class="cities"><b>Fribourg</b>, Bern, Zürich</div>
+          <div id="swissTime" class="output">--:--</div>
+        </div>
+      </div>
+      
+      <div class="time-zone">
+        <div class="time-display">
+          <div class="timezone-label">Eastern Time (ET):</div>
+          <div class="cities">New York, Boston, Miami</div>
+          <div id="easternTime" class="output">--:--</div>
+        </div>
+      </div>
+      
+      <div class="time-zone">
+        <div class="time-display">
+          <div class="timezone-label">Central Time (CT):</div>
+          <div class="cities"><b>"Melanie Time"</b>, Dallas, Milwaukee, Chicago</div>
+          <div id="centralTime" class="output">--:--</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="meeting-section" style="margin-top: 25px; border-top: 1px solid var(--light-gray); padding-top: 20px;">
+      <h2>Create Calendar Event</h2>
+      <div class="input-row" style="margin-bottom: 15px;">
+        <label for="meetingDate">Date:</label>
+        <input type="date" id="meetingDate" style="padding: 10px; border-radius: 5px; border: 1px solid var(--light-gray); margin-right: 15px;">
+        
+        <label for="meetingDuration">Duration:</label>
+        <select id="meetingDuration" style="padding: 10px; border-radius: 5px; border: 1px solid var(--light-gray);">
+          <option value="0.25">15 minutes</option>
+          <option value="0.5">30 minutes</option>
+          <option value="0.75">45 minutes</option>
+          <option value="1" selected>1 hour</option>
+        </select>
+      </div>
+      
+      <div class="input-row">
+        <label for="meetingInfo">Meeting Info:</label>
+        <input type="text" id="meetingInfo" placeholder="Enter meeting details..." style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid var(--light-gray); margin-right: 10px;">
+        <button id="createCalendarBtn" style="background-color: var(--primary-red); color: white; border: none; border-radius: 5px; padding: 10px 15px; cursor: pointer;">Create Calendar Event</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Function to check if date is in DST in Europe
+    function isDstEurope(date) {
+      // Last Sunday of March to last Sunday of October
+      const year = date.getFullYear();
+      
+      // Start of DST: Last Sunday of March
+      const marchLastDay = new Date(year, 2, 31);
+      const marchLastSunday = new Date(
+        year, 
+        2, 
+        marchLastDay.getDate() - marchLastDay.getDay()
+      );
+      
+      // End of DST: Last Sunday of October
+      const octoberLastDay = new Date(year, 9, 31);
+      const octoberLastSunday = new Date(
+        year, 
+        9, 
+        octoberLastDay.getDate() - octoberLastDay.getDay()
+      );
+      
+      return date >= marchLastSunday && date < octoberLastSunday;
+    }
+    
+    // Function to check if date is in DST in US
+    function isDstUS(date) {
+      // Second Sunday of March to first Sunday of November
+      const year = date.getFullYear();
+      
+      // Start of DST: Second Sunday of March
+      const marchSecondSunday = new Date(year, 2, 8);
+      marchSecondSunday.setDate(marchSecondSunday.getDate() + 
+        (7 - marchSecondSunday.getDay()) % 7);
+      
+      // End of DST: First Sunday of November
+      const novemberFirstSunday = new Date(year, 10, 1);
+      novemberFirstSunday.setDate(novemberFirstSunday.getDate() + 
+        (7 - novemberFirstSunday.getDay()) % 7);
+      
+      return date >= marchSecondSunday && date < novemberFirstSunday;
+    }
+    
+    function updateTimes() {
+      const sourceZone = document.getElementById('sourceZone').value;
+      const sourceHour = parseInt(document.getElementById('sourceHour').value);
+      
+      // Get current date to determine if DST is active
+      const now = new Date();
+      const isDstSwitzerland = isDstEurope(now);
+      const isDstUnitedStates = isDstUS(now);
+      
+      // Calculate offsets from UTC
+      const swissOffset = isDstSwitzerland ? 2 : 1; // UTC+1/+2
+      const easternOffset = isDstUnitedStates ? -4 : -5; // UTC-5/-4
+      const centralOffset = isDstUnitedStates ? -5 : -6; // UTC-6/-5
+      
+      // Calculate UTC time based on source time zone
+      let utcHour;
+      
+      if (sourceZone === 'swiss') {
+        utcHour = (sourceHour - swissOffset + 24) % 24;
+      } else if (sourceZone === 'eastern') {
+        utcHour = (sourceHour - easternOffset + 24) % 24;
+      } else if (sourceZone === 'central') {
+        utcHour = (sourceHour - centralOffset + 24) % 24;
+      }
+      
+      // Calculate all time zones from UTC
+      const swissHour = (utcHour + swissOffset + 24) % 24;
+      const easternHour = (utcHour + easternOffset + 24) % 24;
+      const centralHour = (utcHour + centralOffset + 24) % 24;
+      
+      // Format hours with leading zeros
+      const formatHour = (hour) => {
+        return hour.toString().padStart(2, '0') + ':00';
+      };
+      
+      // Update all time displays
+      document.getElementById('swissTime').textContent = formatHour(swissHour);
+      document.getElementById('easternTime').textContent = formatHour(easternHour);
+      document.getElementById('centralTime').textContent = formatHour(centralHour);
+    }
+    
+    // Function to create calendar event
+    function createCalendarEvent() {
+      const meetingInfo = document.getElementById('meetingInfo').value;
+      const sourceZone = document.getElementById('sourceZone').value;
+      const sourceHour = parseInt(document.getElementById('sourceHour').value);
+      const meetingDate = document.getElementById('meetingDate').value || new Date().toISOString().split('T')[0];
+      const duration = parseFloat(document.getElementById('meetingDuration').value);
+      
+      // Format times for all zones
+      const swissTime = document.getElementById('swissTime').textContent;
+      const easternTime = document.getElementById('easternTime').textContent;
+      const centralTime = document.getElementById('centralTime').textContent;
+      
+      // Get timezone labels
+      const swissLabel = document.querySelector('.time-zone:nth-child(1) .timezone-label').textContent;
+      const easternLabel = document.querySelector('.time-zone:nth-child(2) .timezone-label').textContent;
+      const centralLabel = document.querySelector('.time-zone:nth-child(3) .timezone-label').textContent;
+      
+      // Create event title and details
+      const title = meetingInfo || "Meeting";
+      const details = `${meetingInfo}\n\n` +
+                     `${swissLabel} ${swissTime}\n` +
+                     `${easternLabel} ${easternTime}\n` +
+                     `${centralLabel} ${centralTime}`;
+      
+      // Create calendar file content (iCal format)
+      const startHour = sourceHour.toString().padStart(2, '0');
+      
+      // Calculate end time based on duration
+      const endHourValue = (sourceHour + duration) % 24;
+      const endMinutes = (duration % 1) * 60;
+      const endHour = Math.floor(endHourValue).toString().padStart(2, '0');
+      const endMinuteStr = Math.floor(endMinutes).toString().padStart(2, '0');
+      
+      const icalContent = 
+        `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//SMP Time Zone Converter//EN
+BEGIN:VEVENT
+SUMMARY:${title}
+DTSTART:${meetingDate}T${startHour}0000Z
+DTEND:${meetingDate}T${endHour}${endMinuteStr}00Z
+DESCRIPTION:${details.replace(/\n/g, '\\n')}
+END:VEVENT
+END:VCALENDAR`;
+      
+      // Create a download link
+      const element = document.createElement('a');
+      element.setAttribute('href', 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icalContent));
+      element.setAttribute('download', 'meeting.ics');
+      
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      
+      element.click();
+      
+      document.body.removeChild(element);
+      
+      alert('Calendar event created! Check your downloads.');
+    }
+    
+    // Initialize and set up event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('sourceZone').addEventListener('change', updateTimes);
+      document.getElementById('sourceHour').addEventListener('change', updateTimes);
+      
+      // Set default date to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('meetingDate').value = today;
+      
+      // Initialize with current time based on browser's local time
+      const now = new Date();
+      const currentHour = now.getHours();
+      
+      // Set source hour to current hour
+      document.getElementById('sourceHour').value = currentHour;
+      
+      // Try to guess the user's time zone and set it as default
+      const timezoneOffset = now.getTimezoneOffset() / 60;
+      
+      if (timezoneOffset === -1 || timezoneOffset === -2) {
+        // Likely in Swiss time zone (UTC+1 or UTC+2)
+        document.getElementById('sourceZone').value = 'swiss';
+      } else if (timezoneOffset === 5 || timezoneOffset === 4) {
+        // Likely in Eastern time zone (UTC-5 or UTC-4)
+        document.getElementById('sourceZone').value = 'eastern';
+      } else if (timezoneOffset === 6 || timezoneOffset === 5) {
+        // Likely in Central time zone (UTC-6 or UTC-5)
+        document.getElementById('sourceZone').value = 'central';
+      }
+      
+      // Update times on page load
+      updateTimes();
+    });
+    
+    // Add event listener directly after DOM is loaded and rendered
+    window.onload = function() {
+      document.getElementById('createCalendarBtn').addEventListener('click', createCalendarEvent);
+    };
+  </script>
+</body>
+</html>
